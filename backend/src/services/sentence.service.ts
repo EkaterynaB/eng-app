@@ -64,6 +64,10 @@ export const sentenceService = {
         return [];
       }
 
+      // Update last practiced date
+      list.lastPracticedAt = new Date();
+      await list.save();
+
       // Get random sentences from the list
       const sampleSize = Math.min(limit ?? list.sentenceIds.length, list.sentenceIds.length);
       const sentences = await Sentence.aggregate([

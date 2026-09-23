@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { EmptyState } from "../components/EmptyState";
 import { usePracticeLists } from "../hooks/usePracticeLists";
 import { PracticeListInput } from "../types/practiceList";
+import { formatRelativeTime } from "../utils/formatRelativeTime";
 
 export function PracticeListsPage() {
   const navigate = useNavigate();
@@ -138,10 +139,18 @@ export function PracticeListsPage() {
                 <span className="practice-list-count">{list.sentenceIds.length} sentences</span>
               </div>
               {list.description && <p className="practice-list-description">{list.description}</p>}
+              <p className="practice-list-last-practiced">
+                Last practiced: {formatRelativeTime(list.lastPracticedAt)}
+              </p>
               <div className="practice-list-actions">
                 <Link className="btn-primary" to={`/lists/${list._id}`}>
                   Open
                 </Link>
+                {list.sentenceIds.length > 0 && (
+                  <Link className="btn-primary" to={`/practice?listId=${list._id}`}>
+                    Practice
+                  </Link>
+                )}
                 <button className="btn-secondary" onClick={() => handleEdit(list)}>
                   Rename
                 </button>

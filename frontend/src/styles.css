@@ -71,7 +71,7 @@ body {
 
 .page {
   width: 100%;
-  max-width: 640px;
+  max-width: 1200px;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -400,11 +400,17 @@ button[type="submit"]:hover:not(:disabled) {
 /* Practice Lists */
 .practice-list-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+@media (max-width: 768px) {
+  .practice-list-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .practice-list-card {
@@ -444,10 +450,18 @@ button[type="submit"]:hover:not(:disabled) {
   line-height: 1.4;
 }
 
+.practice-list-last-practiced {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  font-style: italic;
+}
+
 .practice-list-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
 }
 
 .practice-list-detail-actions {
