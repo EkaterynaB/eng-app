@@ -11,4 +11,5 @@ export interface SentenceInput {
   englishText: string;
   translation: string;
   notes?: string;
+  practiceListId?: string;
 }

@@ -4,6 +4,7 @@ export const createSentenceSchema = z.object({
   englishText: z.string().trim().min(1, "englishText is required"),
   translation: z.string().trim().min(1, "translation is required"),
   notes: z.string().trim().max(2000).optional(),
+  practiceListId: z.string().trim().optional(),
 });
 
 export const updateSentenceSchema = createSentenceSchema.partial().refine(
@@ -13,6 +14,7 @@ export const updateSentenceSchema = createSentenceSchema.partial().refine(
 
 export const practiceQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(200).optional(),
+  listId: z.string().optional(),
 });
 
 export type CreateSentenceInput = z.infer<typeof createSentenceSchema>;

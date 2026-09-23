@@ -6,8 +6,11 @@ export const sentencesApi = {
     return apiRequest<Sentence[]>("/sentences");
   },
 
-  getForPractice(limit?: number): Promise<Sentence[]> {
-    const query = limit ? `?limit=${limit}` : "";
+  getForPractice(limit?: number, listId?: string): Promise<Sentence[]> {
+    const params = new URLSearchParams();
+    if (limit) params.append("limit", limit.toString());
+    if (listId) params.append("listId", listId);
+    const query = params.toString() ? `?${params.toString()}` : "";
     return apiRequest<Sentence[]>(`/sentences/practice${query}`);
   },
 

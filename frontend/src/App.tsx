@@ -1,6 +1,7 @@
 import { NavLink, Route, Routes } from "react-router-dom";
-import { SentenceManagementPage } from "./pages/SentenceManagementPage";
 import { PracticePage } from "./pages/PracticePage";
+import { PracticeListsPage } from "./pages/PracticeListsPage";
+import { PracticeListDetailPage } from "./pages/PracticeListDetailPage";
 
 export function App() {
   return (
@@ -9,14 +10,15 @@ export function App() {
         <span className="app-title">English Practice</span>
         <div className="app-nav-links">
           <NavLink to="/" end>
-            Sentences
+            Lists
           </NavLink>
           <NavLink to="/practice">Practice</NavLink>
         </div>
       </nav>
       <main className="app-main">
         <Routes>
-          <Route path="/" element={<SentenceManagementPage />} />
+          <Route path="/" element={<PracticeListsPage />} />
+          <Route path="/lists/:id" element={<PracticeListDetailPage />} />
           <Route path="/practice" element={<PracticePage />} />
         </Routes>
       </main>
