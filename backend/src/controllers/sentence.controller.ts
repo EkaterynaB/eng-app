@@ -13,8 +13,8 @@ export const sentenceController = {
   },
 
   async getForPractice(req: Request, res: Response) {
-    const { limit } = (req.parsedQuery ?? {}) as { limit?: number };
-    const sentences = await sentenceService.findForPractice(limit);
+    const { limit, listId } = (req.parsedQuery ?? {}) as { limit?: number; listId?: string };
+    const sentences = await sentenceService.findForPractice(limit, listId);
     res.json(sentences);
   },
 

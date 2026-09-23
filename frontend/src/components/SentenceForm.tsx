@@ -1,15 +1,17 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Sentence, SentenceInput } from "../types/sentence";
+import { PracticeList } from "../types/practiceList";
 
 interface SentenceFormProps {
   initialValue?: Sentence | null;
   onSubmit: (input: SentenceInput) => Promise<void>;
   onCancel?: () => void;
+  availableLists?: PracticeList[];
 }
 
-const emptyForm: SentenceInput = { englishText: "", translation: "", notes: "" };
+const emptyForm: SentenceInput = { englishText: "", translation: "", notes: "", practiceListId: "" };
 
-export function SentenceForm({ initialValue, onSubmit, onCancel }: SentenceFormProps) {
+export function SentenceForm({ initialValue, onSubmit, onCancel, availableLists = [] }: SentenceFormProps) {
   const [form, setForm] = useState<SentenceInput>(emptyForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,6 +22,7 @@ export function SentenceForm({ initialValue, onSubmit, onCancel }: SentenceFormP
         englishText: initialValue.englishText,
         translation: initialValue.translation,
         notes: initialValue.notes ?? "",
+        practiceListId: "",
       });
     } else {
       setForm(emptyForm);
@@ -39,6 +42,7 @@ export function SentenceForm({ initialValue, onSubmit, onCancel }: SentenceFormP
         englishText: form.englishText.trim(),
         translation: form.translation.trim(),
         notes: form.notes?.trim() || undefined,
+        practiceListId: form.practiceListId?.trim() || undefined,
       });
       if (!initialValue) {
         setForm(emptyForm);
@@ -84,6 +88,24 @@ export function SentenceForm({ initialValue, onSubmit, onCancel }: SentenceFormP
           rows={2}
         />
       </div>
+
+      {!initialValue && availableLists.length > 0 && (
+        <div className="form-field">
+          <label htmlFor="practiceListId">Add to practice list (optional)</label>
+          <select
+            id="practiceListId"
+            value={form.practiceListId || ""}
+            onChange={(e) => setForm((f) => ({ ...f, practiceListId: e.target.value }))}
+          >
+            <option value="">-- None --</option>
+            {availableLists.map((list) => (
+              <option key={list._id} value={list._id}>
+                {list.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {error && <p className="form-error">{error}</p>}
 

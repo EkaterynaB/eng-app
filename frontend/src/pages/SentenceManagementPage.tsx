@@ -4,10 +4,12 @@ import { EmptyState } from "../components/EmptyState";
 import { SentenceForm } from "../components/SentenceForm";
 import { SentenceList } from "../components/SentenceList";
 import { useSentences } from "../hooks/useSentences";
+import { usePracticeLists } from "../hooks/usePracticeLists";
 import { Sentence, SentenceInput } from "../types/sentence";
 
 export function SentenceManagementPage() {
   const { sentences, isLoading, error, addSentence, editSentence, deleteSentence } = useSentences();
+  const { lists } = usePracticeLists();
   const [editingSentence, setEditingSentence] = useState<Sentence | null>(null);
 
   const handleSubmit = async (input: SentenceInput) => {
@@ -46,6 +48,7 @@ export function SentenceManagementPage() {
         initialValue={editingSentence}
         onSubmit={handleSubmit}
         onCancel={() => setEditingSentence(null)}
+        availableLists={lists}
       />
 
       {error && <p className="form-error">{error}</p>}
