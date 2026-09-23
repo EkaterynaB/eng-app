@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { sentencesApi } from "../api/sentences";
+import { practiceListsApi } from "../api/practiceLists";
 import { ApiError } from "../api/client";
 import { DiffView } from "../components/DiffView";
 import { EmptyState } from "../components/EmptyState";
 import { ProgressBar } from "../components/ProgressBar";
 import { useSpeechSynthesis } from "../hooks/useSpeechSynthesis";
 import { Sentence } from "../types/sentence";
+import { PracticeList } from "../types/practiceList";
 
 function normalize(text: string): string {
   return text.trim().toLowerCase().replace(/\s+/g, " ").replace(/[.,!?;:]/g, "");
@@ -15,7 +17,10 @@ function normalize(text: string): string {
 type CheckResult = "correct" | "incorrect" | null;
 
 export function PracticePage() {
+  const [searchParams] = useSearchParams();
+  const listId = searchParams.get("listId") || undefined;
   const [sentences, setSentences] = useState<Sentence[] | null>(null);
+  const [listInfo, setListInfo] = useState<PracticeList | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answer, setAnswer] = useState("");
@@ -25,11 +30,26 @@ export function PracticePage() {
   const { isSupported: ttsSupported, speak } = useSpeechSynthesis();
 
   useEffect(() => {
-    sentencesApi
-      .getForPractice()
-      .then(setSentences)
-      .catch((err) => setError(err instanceof ApiError ? err.message : "Failed to load practice session"));
-  }, []);
+    const loadPracticeSession = async () => {
+      try {
+        if (listId) {
+          const [list, sents] = await Promise.all([
+            practiceListsApi.getById(listId),
+            sentencesApi.getForPractice(undefined, listId),
+          ]);
+          setListInfo(list);
+          setSentences(sents);
+        } else {
+          const sents = await sentencesApi.getForPractice();
+          setSentences(sents);
+        }
+      } catch (err) {
+        setError(err instanceof ApiError ? err.message : "Failed to load practice session");
+      }
+    };
+
+    loadPracticeSession();
+  }, [listId]);
 
   const currentSentence = sentences?.[currentIndex] ?? null;
 
@@ -74,7 +94,7 @@ export function PracticePage() {
     return (
       <div className="page">
         <p className="form-error">{error}</p>
-        <Link to="/">Back to sentences</Link>
+        <Link to="/">Back to lists</Link>
       </div>
     );
   }
@@ -92,10 +112,10 @@ export function PracticePage() {
       <div className="page">
         <EmptyState
           title="Nothing to practice yet"
-          description="Add some sentences first, then come back here to practice them."
+          description="Create a practice list and add some sentences first, then come back here to practice them."
           action={
             <Link className="btn-primary" to="/">
-              Add sentences
+              Go to practice lists
             </Link>
           }
         />
@@ -115,7 +135,7 @@ export function PracticePage() {
                 Practice again
               </Link>
               <Link className="btn-secondary" to="/">
-                Back to sentences
+                Back to lists
               </Link>
             </div>
           }
@@ -127,8 +147,13 @@ export function PracticePage() {
   return (
     <div className="page">
       <header className="page-header">
-        <h1>Practice</h1>
-        <Link className="btn-secondary" to="/">
+        <div>
+          <h1>Practice{listInfo ? `: ${listInfo.name}` : ""}</h1>
+          {listInfo && listInfo.description && (
+            <p className="page-subtitle">{listInfo.description}</p>
+          )}
+        </div>
+        <Link className="btn-secondary" to={listId ? `/lists/${listId}` : "/"}>
           Exit
         </Link>
       </header>
