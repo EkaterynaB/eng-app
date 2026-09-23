@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { EmptyState } from "../components/EmptyState";
 import { usePracticeLists } from "../hooks/usePracticeLists";
 import { PracticeListInput } from "../types/practiceList";
 
 export function PracticeListsPage() {
+  const navigate = useNavigate();
   const { lists, isLoading, error, createList, updateList, deleteList } = usePracticeLists();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -26,14 +27,16 @@ export function PracticeListsPage() {
           description: formData.description?.trim() || undefined,
         });
         setEditingId(null);
+        setFormData({ name: "", description: "" });
+        setShowForm(false);
       } else {
-        await createList({
+        const newList = await createList({
           name: formData.name.trim(),
           description: formData.description?.trim() || undefined,
         });
+        // Navigate to the newly created list
+        navigate(`/lists/${newList._id}`);
       }
-      setFormData({ name: "", description: "" });
-      setShowForm(false);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Something went wrong");
     }
