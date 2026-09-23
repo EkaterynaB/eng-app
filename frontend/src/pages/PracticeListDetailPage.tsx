@@ -4,12 +4,14 @@ import { practiceListsApi } from "../api/practiceLists";
 import { sentencesApi } from "../api/sentences";
 import { EmptyState } from "../components/EmptyState";
 import { SentenceForm } from "../components/SentenceForm";
+import { useSpeechSynthesis } from "../hooks/useSpeechSynthesis";
 import { PracticeList } from "../types/practiceList";
 import { Sentence, SentenceInput } from "../types/sentence";
 
 export function PracticeListDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { speak } = useSpeechSynthesis();
   const [list, setList] = useState<PracticeList | null>(null);
   const [sentences, setSentences] = useState<Sentence[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -148,6 +150,9 @@ export function PracticeListDetailPage() {
                 {sentence.notes && <p className="sentence-notes">{sentence.notes}</p>}
               </div>
               <div className="sentence-item-actions">
+                <button className="btn-secondary" onClick={() => speak(sentence.englishText, "en-US")}>
+                  Hear it
+                </button>
                 <button className="btn-secondary" onClick={() => setEditingSentence(sentence)}>
                   Edit
                 </button>
