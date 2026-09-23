@@ -12,7 +12,7 @@ export function useSpeechSynthesis() {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = lang;
-      utterance.voice = window.speechSynthesis.getVoices()[0];
+      utterance.voice = window.speechSynthesis.getVoices()[181];
       window.speechSynthesis.speak(utterance);
     },
     [isSupported]
