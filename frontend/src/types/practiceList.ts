@@ -3,6 +3,7 @@ export interface PracticeList {
   name: string;
   description?: string;
   sentenceIds: string[];
+  lastPracticedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
