@@ -12,7 +12,14 @@ export function usePracticeLists() {
       setIsLoading(true);
       setError(null);
       const data = await practiceListsApi.getAll();
-      setLists(data);
+      // Sort by lastPracticedAt: oldest (or never practiced) first
+      const sorted = [...data].sort((a, b) => {
+        if (!a.lastPracticedAt && !b.lastPracticedAt) return 0;
+        if (!a.lastPracticedAt) return -1;
+        if (!b.lastPracticedAt) return 1;
+        return new Date(a.lastPracticedAt).getTime() - new Date(b.lastPracticedAt).getTime();
+      });
+      setLists(sorted);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load practice lists");
     } finally {
