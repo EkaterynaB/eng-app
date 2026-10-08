@@ -448,6 +448,7 @@ button[type="submit"]:hover:not(:disabled) {
   font-size: 0.9rem;
   color: var(--color-muted);
   line-height: 1.4;
+  white-space: break-spaces;
 }
 
 .practice-list-last-practiced {

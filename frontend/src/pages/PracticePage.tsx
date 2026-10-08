@@ -26,6 +26,7 @@ export function PracticePage() {
   const [answer, setAnswer] = useState("");
   const [result, setResult] = useState<CheckResult>(null);
   const [completedCount, setCompletedCount] = useState(0);
+  const [mistakeCounts, setMistakeCounts] = useState<Map<number, number>>(new Map());
   const inputRef = useRef<HTMLInputElement>(null);
   const { isSupported: ttsSupported, speak } = useSpeechSynthesis();
 
@@ -57,27 +58,56 @@ export function PracticePage() {
     inputRef.current?.focus();
   }, [currentIndex]);
 
+  useEffect(() => {
+    const handleGlobalKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Enter") {
+        if (result === "correct") {
+          handleNext();
+        } else if (!answer.trim()) {
+          // Do nothing if answer is empty
+          return;
+        } else {
+          handleCheck();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [result, sentences, answer, currentSentence]);
+
   const isCorrect = useMemo(() => {
     if (!currentSentence) return false;
     return normalize(answer) === normalize(currentSentence.englishText);
   }, [answer, currentSentence]);
 
   const handleCheck = () => {
-    if (!currentSentence || !answer.trim()) return;
+    if (!currentSentence || !answer.trim() || !sentences) return;
     setResult(isCorrect ? "correct" : "incorrect");
+
     if (isCorrect) {
       setCompletedCount((c) => c + 1);
+
+      // Check if the user made 2 or more mistakes on this sentence
+      const currentMistakes = mistakeCounts.get(currentIndex) || 0;
+      if (currentMistakes >= 2) {
+        // Duplicate the sentence and add it to the end for more practice
+        const newSentences = [...sentences];
+        newSentences.push(currentSentence);
+        setSentences(newSentences);
+
+        // Reset mistake count for this sentence
+        const newMistakeCounts = new Map(mistakeCounts);
+        newMistakeCounts.delete(currentIndex);
+        setMistakeCounts(newMistakeCounts);
+      }
+    } else {
+      // Increment mistake count for the current sentence
+      const currentMistakes = mistakeCounts.get(currentIndex) || 0;
+      setMistakeCounts(new Map(mistakeCounts).set(currentIndex, currentMistakes + 1));
     }
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key !== "Enter") return;
-    if (result === "correct") {
-      handleNext();
-    } else {
-      handleCheck();
-    }
-  };
 
   const handleNext = () => {
     if (!sentences) return;
@@ -88,6 +118,7 @@ export function PracticePage() {
 
   const handleTryAgain = () => {
     setResult(null);
+    setAnswer("");
   };
 
   if (error) {
@@ -168,8 +199,12 @@ export function PracticePage() {
           ref={inputRef}
           className="practice-input"
           value={answer}
-          onChange={(e) => setAnswer(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onChange={(e) => {
+            setAnswer(e.target.value);
+            if (result === "incorrect") {
+              setResult(null);
+            }
+          }}
           placeholder="Type the English sentence..."
           autoComplete="off"
           disabled={result === "correct"}
