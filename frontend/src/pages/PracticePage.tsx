@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { sentencesApi } from "../api/sentences";
 import { practiceListsApi } from "../api/practiceLists";
@@ -26,7 +26,7 @@ export function PracticePage() {
   const [answer, setAnswer] = useState("");
   const [result, setResult] = useState<CheckResult>(null);
   const [completedCount, setCompletedCount] = useState(0);
-  const [mistakeCounts, setMistakeCounts] = useState<Map<number, number>>(new Map());
+  const [mistakeCounts, setMistakeCounts] = useState<Map<string, number>>(new Map());
   const inputRef = useRef<HTMLInputElement>(null);
   const { isSupported: ttsSupported, speak } = useSpeechSynthesis();
 
@@ -58,30 +58,19 @@ export function PracticePage() {
     inputRef.current?.focus();
   }, [currentIndex]);
 
-  useEffect(() => {
-    const handleGlobalKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Enter") {
-        if (result === "correct") {
-          handleNext();
-        } else if (!answer.trim()) {
-          // Do nothing if answer is empty
-          return;
-        } else {
-          handleCheck();
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleGlobalKeyDown);
-    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, [result, sentences, answer, currentSentence]);
-
   const isCorrect = useMemo(() => {
     if (!currentSentence) return false;
     return normalize(answer) === normalize(currentSentence.englishText);
   }, [answer, currentSentence]);
 
-  const handleCheck = () => {
+  const handleNext = useCallback(() => {
+    if (!sentences) return;
+    setResult(null);
+    setAnswer("");
+    setCurrentIndex((i) => i + 1);
+  }, [sentences]);
+
+  const handleCheck = useCallback(() => {
     if (!currentSentence || !answer.trim() || !sentences) return;
     setResult(isCorrect ? "correct" : "incorrect");
 
@@ -89,7 +78,7 @@ export function PracticePage() {
       setCompletedCount((c) => c + 1);
 
       // Check if the user made 2 or more mistakes on this sentence
-      const currentMistakes = mistakeCounts.get(currentIndex) || 0;
+      const currentMistakes = mistakeCounts.get(currentSentence._id) || 0;
       if (currentMistakes >= 2) {
         // Duplicate the sentence and add it to the end for more practice
         const newSentences = [...sentences];
@@ -98,23 +87,39 @@ export function PracticePage() {
 
         // Reset mistake count for this sentence
         const newMistakeCounts = new Map(mistakeCounts);
-        newMistakeCounts.delete(currentIndex);
+        newMistakeCounts.delete(currentSentence._id);
         setMistakeCounts(newMistakeCounts);
       }
     } else {
       // Increment mistake count for the current sentence
-      const currentMistakes = mistakeCounts.get(currentIndex) || 0;
-      setMistakeCounts(new Map(mistakeCounts).set(currentIndex, currentMistakes + 1));
+      const currentMistakes = mistakeCounts.get(currentSentence._id) || 0;
+      setMistakeCounts(new Map(mistakeCounts).set(currentSentence._id, currentMistakes + 1));
     }
-  };
+  }, [currentSentence, answer, sentences, isCorrect, mistakeCounts]);
 
+  useEffect(() => {
+    const handleGlobalKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Enter") return;
 
-  const handleNext = () => {
-    if (!sentences) return;
-    setResult(null);
-    setAnswer("");
-    setCurrentIndex((i) => i + 1);
-  };
+      // Only handle Enter if we're in an input field or the practice card
+      const target = event.target as HTMLElement;
+      if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && !target.closest('.practice-card')) {
+        return;
+      }
+
+      if (result === "correct") {
+        handleNext();
+      } else if (!answer.trim()) {
+        // Do nothing if answer is empty
+        return;
+      } else {
+        handleCheck();
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [result, answer, handleNext, handleCheck]);
 
   const handleTryAgain = () => {
     setResult(null);
