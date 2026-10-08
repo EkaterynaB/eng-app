@@ -101,20 +101,25 @@ export function PracticePage() {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Enter") return;
 
-      // Only handle Enter if we're in an input field or the practice card
-      const target = event.target as HTMLElement;
-      if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && !target.closest('.practice-card')) {
+      // When result is correct, allow Enter from anywhere to proceed
+      if (result === "correct") {
+        handleNext();
         return;
       }
 
-      if (result === "correct") {
-        handleNext();
-      } else if (!answer.trim()) {
+      // For checking answers, only handle if we're in the practice input
+      const target = event.target as HTMLElement;
+      const isPracticeInput = target === inputRef.current;
+      if (!isPracticeInput) {
+        return;
+      }
+
+      if (!answer.trim()) {
         // Do nothing if answer is empty
         return;
-      } else {
-        handleCheck();
       }
+
+      handleCheck();
     };
 
     window.addEventListener("keydown", handleGlobalKeyDown);
