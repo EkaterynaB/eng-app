@@ -4,6 +4,7 @@ import { env } from "./config/env";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { sentenceRouter } from "./routes/sentence.routes";
 import { practiceListRouter } from "./routes/practiceList.routes";
+import { dialogueRouter } from "./routes/dialogue.routes";
 
 export function createApp(): Express {
   const app = express();
@@ -17,6 +18,7 @@ export function createApp(): Express {
 
   app.use("/api/sentences", sentenceRouter);
   app.use("/api/practice-lists", practiceListRouter);
+  app.use("/api/dialogues", dialogueRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

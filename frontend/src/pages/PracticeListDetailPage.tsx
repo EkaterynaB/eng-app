@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { practiceListsApi } from "../api/practiceLists";
 import { sentencesApi } from "../api/sentences";
 import { EmptyState } from "../components/EmptyState";
@@ -9,7 +9,6 @@ import { Sentence, SentenceInput } from "../types/sentence";
 
 export function PracticeListDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const [list, setList] = useState<PracticeList | null>(null);
   const [sentences, setSentences] = useState<Sentence[]>([]);
   const [isLoading, setIsLoading] = useState(true);

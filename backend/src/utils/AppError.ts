@@ -13,3 +13,9 @@ export class NotFoundError extends AppError {
     super(404, message);
   }
 }
+
+export class ValidationError extends AppError {
+  constructor(message = "Validation failed") {
+    super(409, message);
+  }
+}
