@@ -689,3 +689,32 @@ button[type="submit"]:hover:not(:disabled) {
     max-width: 100%;
   }
 }
+
+/* Import from text */
+.import-sentence-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.import-sentence-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.import-sentence-row input {
+  font: inherit;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .import-sentence-row {
+    grid-template-columns: 1fr;
+  }
+}

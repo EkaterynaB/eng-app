@@ -75,9 +75,14 @@ export function PracticeListsPage() {
           <p className="page-subtitle">Organize sentences into themed practice lists.</p>
         </div>
         {!showForm && (
-          <button className="btn-primary" onClick={() => setShowForm(true)}>
-            Create new list
-          </button>
+          <div className="form-actions">
+            <button className="btn-primary" onClick={() => setShowForm(true)}>
+              Create new list
+            </button>
+            <Link className="btn-secondary" to="/lists/import">
+              Import from text
+            </Link>
+          </div>
         )}
       </header>
 

@@ -2,6 +2,7 @@ import { NavLink, Route, Routes } from "react-router-dom";
 import { PracticePage } from "./pages/PracticePage";
 import { PracticeListsPage } from "./pages/PracticeListsPage";
 import { PracticeListDetailPage } from "./pages/PracticeListDetailPage";
+import { ImportTextPage } from "./pages/ImportTextPage";
 import { DialoguesPage } from "./pages/DialoguesPage";
 import { DialogueCreatePage } from "./pages/DialogueCreatePage";
 import { DialogueEditPage } from "./pages/DialogueEditPage";
@@ -24,6 +25,7 @@ export function App() {
       <main className="app-main">
         <Routes>
           <Route path="/" element={<PracticeListsPage />} />
+          <Route path="/lists/import" element={<ImportTextPage />} />
           <Route path="/lists/:id" element={<PracticeListDetailPage />} />
           <Route path="/practice" element={<PracticePage />} />
           <Route path="/dialogues" element={<DialoguesPage />} />
