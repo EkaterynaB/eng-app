@@ -54,7 +54,7 @@ export const sentenceService = {
 
   async findForPractice(limit?: number, listId?: string) {
     if (listId) {
-      // Get sentences from specific practice list
+      // Get sentences from specific practice list, in the list's own order
       const list = await PracticeList.findById(listId);
       if (!list) {
         throw new NotFoundError("Practice list not found");
@@ -68,17 +68,17 @@ export const sentenceService = {
       list.lastPracticedAt = new Date();
       await list.save();
 
-      // Get random sentences from the list
-      const sampleSize = Math.min(limit ?? list.sentenceIds.length, list.sentenceIds.length);
-      const sentences = await Sentence.aggregate([
-        { $match: { _id: { $in: list.sentenceIds } } },
-        { $sample: { size: sampleSize } },
-      ]);
-      return sentences;
+      const orderedIds = limit ? list.sentenceIds.slice(0, limit) : list.sentenceIds;
+      const sentences = await Sentence.find({ _id: { $in: orderedIds } });
+      const sentenceById = new Map(sentences.map((sentence) => [sentence._id.toString(), sentence]));
+      return orderedIds.map((id) => sentenceById.get(id.toString())).filter((s): s is NonNullable<typeof s> => !!s);
     }
 
-    // Get all sentences
-    const sentences = await Sentence.aggregate([{ $sample: { size: limit ?? 1000 } }]);
-    return sentences;
+    // Get all sentences in creation order
+    const query = Sentence.find().sort({ createdAt: 1 });
+    if (limit) {
+      query.limit(limit);
+    }
+    return query;
   },
 };
