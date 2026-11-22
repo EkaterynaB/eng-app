@@ -3,6 +3,7 @@ import { z } from "zod";
 export const createPracticeListSchema = z.object({
   name: z.string().trim().min(1, "name is required").max(100, "name is too long"),
   description: z.string().trim().max(500, "description is too long").optional(),
+  preserveOrder: z.boolean().optional(),
 });
 
 export const updatePracticeListSchema = z.object({

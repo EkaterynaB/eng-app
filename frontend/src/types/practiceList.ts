@@ -4,6 +4,7 @@ export interface PracticeList {
   description?: string;
   sentenceIds: string[];
   lastPracticedAt?: string;
+  preserveOrder?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -11,6 +12,7 @@ export interface PracticeList {
 export interface PracticeListInput {
   name: string;
   description?: string;
+  preserveOrder?: boolean;
 }
 
 export interface PracticeListWithCount extends PracticeList {

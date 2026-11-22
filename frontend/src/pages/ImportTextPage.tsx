@@ -77,6 +77,7 @@ export function ImportTextPage() {
       const list = await practiceListsApi.create({
         name: name.trim(),
         description: description.trim() || undefined,
+        preserveOrder: true,
       });
 
       for (const row of rows) {

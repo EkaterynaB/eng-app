@@ -6,6 +6,7 @@ const practiceListSchema = new Schema(
     description: { type: String, trim: true },
     sentenceIds: [{ type: Schema.Types.ObjectId, ref: "Sentence" }],
     lastPracticedAt: { type: Date },
+    preserveOrder: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
