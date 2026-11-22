@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { EmptyState } from "../components/EmptyState";
 import { usePracticeLists } from "../hooks/usePracticeLists";
 import { PracticeListInput } from "../types/practiceList";
+import { formatRelativeTime } from "../utils/formatRelativeTime";
 
 export function PracticeListsPage() {
+  const navigate = useNavigate();
   const { lists, isLoading, error, createList, updateList, deleteList } = usePracticeLists();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -26,14 +28,16 @@ export function PracticeListsPage() {
           description: formData.description?.trim() || undefined,
         });
         setEditingId(null);
+        setFormData({ name: "", description: "" });
+        setShowForm(false);
       } else {
-        await createList({
+        const newList = await createList({
           name: formData.name.trim(),
           description: formData.description?.trim() || undefined,
         });
+        // Navigate to the newly created list
+        navigate(`/lists/${newList._id}`);
       }
-      setFormData({ name: "", description: "" });
-      setShowForm(false);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Something went wrong");
     }
@@ -140,10 +144,18 @@ export function PracticeListsPage() {
                 <span className="practice-list-count">{list.sentenceIds.length} sentences</span>
               </div>
               {list.description && <p className="practice-list-description">{list.description}</p>}
+              <p className="practice-list-last-practiced">
+                Last practiced: {formatRelativeTime(list.lastPracticedAt)}
+              </p>
               <div className="practice-list-actions">
                 <Link className="btn-primary" to={`/lists/${list._id}`}>
                   Open
                 </Link>
+                {list.sentenceIds.length > 0 && (
+                  <Link className="btn-primary" to={`/practice?listId=${list._id}`}>
+                    Practice
+                  </Link>
+                )}
                 <button className="btn-secondary" onClick={() => handleEdit(list)}>
                   Rename
                 </button>
