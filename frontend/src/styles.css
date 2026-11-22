@@ -143,6 +143,14 @@ body {
   margin: 0;
 }
 
+.form-warning {
+  color: #92620a;
+  background: rgba(217, 164, 6, 0.12);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.9rem;
+  margin: 0;
+}
+
 button,
 .btn-primary,
 .btn-secondary,

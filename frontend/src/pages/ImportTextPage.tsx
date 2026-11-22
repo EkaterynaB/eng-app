@@ -17,7 +17,9 @@ export function ImportTextPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [rawText, setRawText] = useState("");
+  const [translationText, setTranslationText] = useState("");
   const [rows, setRows] = useState<ReviewRow[]>([]);
+  const [countMismatch, setCountMismatch] = useState<{ english: number; translation: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -28,13 +30,25 @@ export function ImportTextPage() {
       return;
     }
 
-    const sentences = splitSentences(rawText);
-    if (sentences.length === 0) {
+    const englishSentences = splitSentences(rawText);
+    if (englishSentences.length === 0) {
       setError("Couldn't find any sentences in that text.");
       return;
     }
 
-    setRows(sentences.map((englishText) => ({ englishText, translation: "" })));
+    const translationSentences = translationText.trim() ? splitSentences(translationText) : [];
+
+    setRows(
+      englishSentences.map((englishText, index) => ({
+        englishText,
+        translation: translationSentences[index] ?? "",
+      }))
+    );
+    setCountMismatch(
+      translationSentences.length > 0 && translationSentences.length !== englishSentences.length
+        ? { english: englishSentences.length, translation: translationSentences.length }
+        : null
+    );
     setError(null);
     setStep("review");
   };
@@ -125,6 +139,17 @@ export function ImportTextPage() {
             />
           </div>
 
+          <div className="form-field">
+            <label htmlFor="import-translation">Translation text (optional)</label>
+            <textarea
+              id="import-translation"
+              value={translationText}
+              onChange={(e) => setTranslationText(e.target.value)}
+              placeholder="Paste the matching translation, sentence by sentence, and we'll pair them up..."
+              rows={10}
+            />
+          </div>
+
           {error && <p className="form-error">{error}</p>}
 
           <div className="form-actions">
@@ -148,6 +173,14 @@ export function ImportTextPage() {
           </p>
         </div>
       </header>
+
+      {countMismatch && (
+        <p className="form-warning">
+          ⚠️ The English text split into {countMismatch.english} sentences, but the translation split into{" "}
+          {countMismatch.translation}. They were paired up by order — double-check the pairing below, especially
+          near the end.
+        </p>
+      )}
 
       <div className="import-sentence-list">
         {rows.map((row, index) => (
